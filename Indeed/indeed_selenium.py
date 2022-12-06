@@ -10,7 +10,10 @@ from csv import writer
 PATH = "C:\Program Files (x86)\chromedriver.exe"
 driver = webdriver.Chrome(PATH)
 SEARCH_QUERIES = ["data+engineer", "terraform"]
-start_url = "https://www.indeed.com/jobs?q=data+engineer&sc=0kf%3Ajt%28contract%29%3B&sort=date&fromage=1&vjk=607b75599f92b916"
+
+def search(query):
+    start_url = f"https://www.indeed.com/jobs?q={query}&sc=0kf%3Ajt%28contract%29%3B&sort=date&fromage=1&vjk=607b75599f92b916"
+    parse(start_url)
 
 def parse(link):
     driver.get(link)
@@ -24,10 +27,8 @@ def parse(link):
         parse(next_page)
 
 def parse_details(links):
-    page_num = 0
     for link in links:
         link = "https://indeed.com" + link
-        page_num +=1
         driver.get(link)
         time.sleep(randint(1,5))
         link_page = Selector(text=driver.page_source)
@@ -37,6 +38,7 @@ def parse_details(links):
         print(name, company_name, desc)
 
 def main():
-    parse(start_url)
+    for query in SEARCH_QUERIES:
+        search(query)
 
 main()
