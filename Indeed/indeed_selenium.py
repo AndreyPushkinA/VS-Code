@@ -3,13 +3,24 @@ from scrapy import Selector
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from random import randint
+import requests
 import time
-from csv import writer
+import csv
 
 
 PATH = "C:\Program Files (x86)\chromedriver.exe"
 driver = webdriver.Chrome(PATH)
-SEARCH_QUERIES = ["data+engineer", "terraform"]
+SEARCH_QUERIES = ["data+engineer", "terraform", "airflow"]
+
+TELEGRAM_TOKEN='5712604269:AAFDrWRqtKcZ1g3EkiIr4i2FeukSdySVGas'
+TELEGRAM_CHAT_ID=5592590203
+
+def send_msg(text):
+    token = TELEGRAM_TOKEN
+    _id = TELEGRAM_CHAT_ID
+
+    url_req = f"https://api.telegram.org/bot{token}/sendMessage?chat_id={_id}&text={text}"
+    requests.get(url_req)
 
 def search(query):
     start_url = f"https://www.indeed.com/jobs?q={query}&sc=0kf%3Ajt%28contract%29%3B&sort=date&fromage=1&vjk=607b75599f92b916"
@@ -35,6 +46,7 @@ def parse_details(links):
         name = link_page.xpath('//h1[contains(@class, "jobsearch-JobInfoHeader")]/text()').extract_first()
         company_name = link_page.xpath('//div[contains(@class, "jobsearch-InlineCompanyRating-companyHeader")]/a/text()').extract_first()
         desc = '\n'.join(link_page.xpath('//div[contains(@id, "jobDescriptionText")]//text()').extract())
+        send_msg(f"{name}, {company_name}, {desc}, {link}")
         print(name, company_name, desc)
 
 def main():
