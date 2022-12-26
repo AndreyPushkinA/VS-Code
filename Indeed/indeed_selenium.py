@@ -5,12 +5,14 @@ from selenium.webdriver.common.by import By
 from random import randint
 import requests
 import time
+from db import create_table, get_engine, get_session, Ads
 import csv
 
 
-PATH = "C:\Program Files (x86)\chromedriver.exe"
-driver = webdriver.Chrome(PATH)
+driver = webdriver.Chrome(executable_path=r'/home/andrey/Downloads/chromedriver')
+
 SEARCH_QUERIES = ["data+engineer", "terraform", "airflow"]
+DOMENS = ["www", "uk", "nl", "de"]
 
 TELEGRAM_TOKEN='5712604269:AAFDrWRqtKcZ1g3EkiIr4i2FeukSdySVGas'
 TELEGRAM_CHAT_ID=5592590203
@@ -23,8 +25,9 @@ def send_msg(text):
     requests.get(url_req)
 
 def search(query):
-    start_url = f"https://www.indeed.com/jobs?q={query}&sc=0kf%3Ajt%28contract%29%3B&sort=date&fromage=1&vjk=607b75599f92b916"
-    parse(start_url)
+    for domen in DOMENS:
+        start_url = f"https://uk.indeed.com/jobs?q=data+engineer&sc=0kf%3Ajt%28contract%29%3B&vjk=afdf0de91d191ac7"
+        parse(start_url)
 
 def parse(link):
     driver.get(link)
@@ -38,6 +41,9 @@ def parse(link):
         parse(next_page)
 
 def parse_details(links):
+    engine = get_engine()
+    create_table(engine)
+    session = get_session(engine)
     for link in links:
         link = "https://indeed.com" + link
         driver.get(link)
@@ -46,8 +52,17 @@ def parse_details(links):
         name = link_page.xpath('//h1[contains(@class, "jobsearch-JobInfoHeader")]/text()').extract_first()
         company_name = link_page.xpath('//div[contains(@class, "jobsearch-InlineCompanyRating-companyHeader")]/a/text()').extract_first()
         desc = '\n'.join(link_page.xpath('//div[contains(@id, "jobDescriptionText")]//text()').extract())
-        send_msg(f"{name}, {company_name}, {desc}, {link}")
+        # send_msg(f"{name}, {company_name}, {desc}, {link}")
+        new_ad = Ads(title=name, company=company_name, description=desc, link=link)
+        choose = session.query(Ads).filter(Ads.link == link).first()
+        if choose:
+            continue
+
+        session.add(new_ad)
+
+        session.commit()
         print(name, company_name, desc)
+        session.close()
 
 def main():
     for query in SEARCH_QUERIES:
