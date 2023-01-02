@@ -12,7 +12,7 @@ import csv
 driver = webdriver.Chrome(executable_path=r'/home/andrey/Downloads/chromedriver')
 
 SEARCH_QUERIES = ["data+engineer", "terraform", "airflow"]
-DOMENS = ["www", "uk", "nl", "de"]
+DOMENS = ["www", "uk"] #, "nl", "de"]
 
 TELEGRAM_TOKEN='5712604269:AAFDrWRqtKcZ1g3EkiIr4i2FeukSdySVGas'
 TELEGRAM_CHAT_ID=5592590203
@@ -26,7 +26,7 @@ def send_msg(text):
 
 def search(query):
     for domen in DOMENS:
-        start_url = f"https://uk.indeed.com/jobs?q=data+engineer&sc=0kf%3Ajt%28contract%29%3B&vjk=afdf0de91d191ac7"
+        start_url = f"https://{domen}.indeed.com/jobs?q={query}&sc=0kf%3Ajt(contract)%253B&fromage=1"
         parse(start_url)
 
 def parse(link):
